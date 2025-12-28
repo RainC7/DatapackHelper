@@ -56,7 +56,7 @@ You are allowed to fork this repository and use its base as a way to publish you
 8. Change some of the translations in `src/locales/en.json`. Particularly you might want to change the `title.home` key.
 
 ## Offline Electron build
-1. Install dependencies (`npm install`) and fetch offline assets: `python scripts/fetch_offline_data.py --versions 1.21.11`.
+1. Install dependencies (`npm install`) and fetch offline assets: `python3 scripts/fetch_offline_data.py --versions 1.21.11` (or `--all` to mirror every version from `src/config.json`).
 2. Build the app with offline flags: `npm run build:offline`.
 3. Package the Electron bundle: `npm run electron:build` (artifacts land in `release/`).
 4. For development with Electron and the Vite dev server, run `npm run electron:dev`.

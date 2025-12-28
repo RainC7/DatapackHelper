@@ -22,8 +22,19 @@ jobs:
         with:
           node-version: 20
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
       - name: Install dependencies
         run: npm install
+
+      - name: Fetch offline data (all versions)
+        run: python3 scripts/fetch_offline_data.py --all --quiet
+
+      - name: Build renderer (offline)
+        run: npm run build:offline
 
       - name: Package Electron app
         run: npm run electron:build

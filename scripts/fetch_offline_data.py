@@ -129,13 +129,31 @@ def write_manifest(versions: List[str]) -> None:
 
 def main(argv: List[str]) -> int:
 	parser = argparse.ArgumentParser(description="Fetch offline data for DatapackHelper.")
-	parser.add_argument("--versions", nargs="+", default=["1.21.11"],
-	                    help="Version identifiers to pre-download (e.g. 1.21.11 1.21.6).")
+	parser.add_argument("--versions", nargs="+", default=None,
+	                    help="Version identifiers to pre-download (e.g. 1.21.11 1.21.6). Overrides --all.")
+	parser.add_argument("--all", action="store_true",
+	                    help="Download data for all versions listed in src/config.json.")
+	parser.add_argument("--config", default="src/config.json",
+	                    help="Path to config.json containing versions[].id (used with --all).")
 	parser.add_argument("--latest", default=None,
 	                    help="Version to mirror under mcmeta/summary for dynamic latest lookups (default: first version).")
+	parser.add_argument("--quiet", action="store_true", help="Reduce logging output.")
 	args = parser.parse_args(argv)
 
-	versions = args.versions
+	if args.all:
+		config_path = ROOT / args.config
+		try:
+			config_data = json.loads(config_path.read_text())
+			versions = [v["id"] for v in config_data.get("versions", []) if "id" in v]
+			if not versions:
+				raise ValueError("No versions found in config.")
+			print(f"[info] Loaded {len(versions)} versions from {config_path}")
+		except Exception as exc:
+			print(f"[error] Failed to read versions from {config_path}: {exc}", file=sys.stderr)
+			return 1
+	else:
+		versions = args.versions or ["1.21.11"]
+
 	latest = args.latest or versions[0]
 
 	all_tasks: List[Tuple[str, pathlib.Path]] = []
@@ -148,7 +166,8 @@ def main(argv: List[str]) -> int:
 		try:
 			fetch(url, dest)
 		except Exception as exc:
-			print(f"[warn] failed to fetch {url}: {exc}", file=sys.stderr)
+			if not args.quiet:
+				print(f"[warn] failed to fetch {url}: {exc}", file=sys.stderr)
 
 	write_manifest(versions)
 	return 0

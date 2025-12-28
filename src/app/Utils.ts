@@ -11,7 +11,7 @@ import config from './Config.js'
 import type { VersionId } from './services/index.js'
 import { checkVersion } from './services/index.js'
 
-export const SOURCE_REPO_URL = 'https://github.com/misode/misode.github.io'
+export const SOURCE_REPO_URL = 'git@github-rainc7:RainC7/DatapackHelper.git'
 export const OFFLINE = (import.meta as any).env.VITE_OFFLINE === 'true'
 export const OFFLINE_BASE = (import.meta as any).env.VITE_OFFLINE_BASE ?? '/offline-data'
 
