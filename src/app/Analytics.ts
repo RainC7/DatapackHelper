@@ -3,6 +3,13 @@ import type { VersionId } from './services/index.js'
 
 export type Method = 'menu' | 'hotkey'
 
+const gtag = (...args: any[]) => {
+	const fn = (globalThis as { gtag?: (...params: any[]) => void }).gtag
+	if (typeof fn === 'function') {
+		fn(...args)
+	}
+}
+
 export namespace Analytics {
 	export function pageview(url: string) {
 		gtag('event', 'page_view', {
