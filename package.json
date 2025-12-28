@@ -13,7 +13,7 @@
     "build:offline": "cross-env VITE_OFFLINE=true VITE_OFFLINE_BASE=/offline-data tsc && cross-env VITE_OFFLINE=true VITE_OFFLINE_BASE=/offline-data vite build",
     "offline:data": "python scripts/fetch_offline_data.py",
     "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && cross-env VITE_DEV_SERVER_URL=http://localhost:3000 electron .\"",
-    "electron:build": "npm run offline:data && npm run build:offline && electron-builder"
+    "electron:build": "electron-builder"
   },
   "keywords": [],
   "author": "Misode",
