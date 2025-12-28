@@ -20,6 +20,7 @@ You can extend the payloads by adding more endpoints to the FETCH_MAP below.
 import argparse
 import json
 import pathlib
+import ssl
 import sys
 import urllib.request
 from typing import Iterable, List, Tuple
@@ -34,12 +35,15 @@ MCFIXES_BASE = "https://raw.githubusercontent.com/misode/mcfixes"
 WHATS_NEW_URL = "https://whats-new.misode.workers.dev"
 
 
-def fetch(url: str, dest: pathlib.Path) -> None:
+
+def fetch(url: str, dest: pathlib.Path, *, insecure: bool = False, quiet: bool = False) -> None:
 	dest.parent.mkdir(parents=True, exist_ok=True)
-	with urllib.request.urlopen(url) as response:
+	context = ssl._create_unverified_context() if insecure else None
+	with urllib.request.urlopen(url, context=context) as response:
 		data = response.read()
 	dest.write_bytes(data)
-	print(f"[saved] {dest.relative_to(ROOT)}")
+	if not quiet:
+		print(f"[saved] {dest.relative_to(ROOT)}")
 
 
 def build_mcmeta_paths(version: str) -> List[Tuple[str, pathlib.Path]]:
@@ -137,6 +141,11 @@ def main(argv: List[str]) -> int:
 	                    help="Path to config.json containing versions[].id (used with --all).")
 	parser.add_argument("--latest", default=None,
 	                    help="Version to mirror under mcmeta/summary for dynamic latest lookups (default: first version).")
+	parser.add_argument(
+		"--insecure",
+		action="store_true",
+		help="Disable TLS certificate verification for downloads (NOT recommended).",
+	)
 	parser.add_argument("--quiet", action="store_true", help="Reduce logging output.")
 	args = parser.parse_args(argv)
 
@@ -164,7 +173,7 @@ def main(argv: List[str]) -> int:
 
 	for url, dest in all_tasks:
 		try:
-			fetch(url, dest)
+			fetch(url, dest, insecure=args.insecure, quiet=args.quiet)
 		except Exception as exc:
 			if not args.quiet:
 				print(f"[warn] failed to fetch {url}: {exc}", file=sys.stderr)
