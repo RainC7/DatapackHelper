@@ -78,7 +78,7 @@
   "build": {
     "appId": "com.datapack.helper",
     "productName": "DatapackHelper",
-    "publish": "never",
+    "publish": null,
     "files": [
       "dist/**/*",
       "electron/**/*",
