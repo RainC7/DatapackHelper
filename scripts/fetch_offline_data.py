@@ -147,6 +147,11 @@ def main(argv: List[str]) -> int:
 		help="Disable TLS certificate verification for downloads (NOT recommended).",
 	)
 	parser.add_argument("--quiet", action="store_true", help="Reduce logging output.")
+	parser.add_argument(
+		"--strict",
+		action="store_true",
+		help="Exit with non-zero status if any download fails.",
+	)
 	args = parser.parse_args(argv)
 
 	if args.all:
@@ -171,12 +176,19 @@ def main(argv: List[str]) -> int:
 		all_tasks.extend(build_mcmeta_paths(v))
 	all_tasks.extend(build_global_payloads(versions))
 
+	failures: List[Tuple[str, str]] = []
 	for url, dest in all_tasks:
 		try:
 			fetch(url, dest, insecure=args.insecure, quiet=args.quiet)
 		except Exception as exc:
+			failures.append((url, str(exc)))
 			if not args.quiet:
 				print(f"[warn] failed to fetch {url}: {exc}", file=sys.stderr)
+
+	if failures:
+		print(f"[error] {len(failures)} downloads failed.", file=sys.stderr)
+		if args.strict:
+			return 1
 
 	write_manifest(versions)
 	return 0
