@@ -143,7 +143,7 @@ def main(argv: List[str]) -> int:
 	if args.all:
 		config_path = ROOT / args.config
 		try:
-			config_data = json.loads(config_path.read_text())
+			config_data = json.loads(config_path.read_text(encoding="utf-8"))
 			versions = [v["id"] for v in config_data.get("versions", []) if "id" in v]
 			if not versions:
 				raise ValueError("No versions found in config.")
