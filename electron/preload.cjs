@@ -1,5 +1,5 @@
 // Expose a minimal, isolated preload so the renderer stays sandboxed.
-import { contextBridge } from 'electron'
+const { contextBridge } = require('electron')
 
 contextBridge.exposeInMainWorld('datapackHelper', {
 	isElectron: true,
