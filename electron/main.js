@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell } from 'electron'
+import { app, BrowserWindow, protocol, shell } from 'electron'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -6,6 +6,18 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const isDev = !app.isPackaged
+
+protocol.registerSchemesAsPrivileged([
+	{
+		scheme: 'app',
+		privileges: {
+			standard: true,
+			secure: true,
+			supportFetchAPI: true,
+			corsEnabled: true,
+		},
+	},
+])
 
 function createWindow() {
 	const win = new BrowserWindow({
@@ -28,11 +40,31 @@ function createWindow() {
 		win.loadURL(process.env.VITE_DEV_SERVER_URL || 'http://localhost:3000')
 		win.webContents.openDevTools({ mode: 'detach' })
 	} else {
-		win.loadFile(path.join(__dirname, '../dist/index.html'))
+		win.loadURL('app://./index.html')
 	}
 }
 
-app.whenReady().then(createWindow)
+function registerAppProtocol() {
+	const distPath = path.join(__dirname, '../dist')
+	protocol.registerFileProtocol('app', (request, callback) => {
+		const url = new URL(request.url)
+		const pathname = decodeURIComponent(url.pathname)
+		const relativePath = pathname.replace(/^\/+/, '')
+		const filePath = relativePath === ''
+			? path.join(distPath, 'index.html')
+			: path.extname(relativePath) === ''
+				? path.join(distPath, relativePath, 'index.html')
+				: path.join(distPath, relativePath)
+		callback({ path: filePath })
+	})
+}
+
+app.whenReady().then(() => {
+	if (!isDev) {
+		registerAppProtocol()
+	}
+	createWindow()
+})
 
 app.on('window-all-closed', () => {
 	if (process.platform !== 'darwin') {
