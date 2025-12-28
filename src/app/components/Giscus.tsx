@@ -1,10 +1,14 @@
 import GiscusReact from '@giscus/react'
+import { OFFLINE } from '../Utils.js'
 import { useTheme } from '../contexts/index.js'
 
 interface Props {
 	term?: string,
 }
 export function Giscus({ term }: Props) {
+	if (OFFLINE) {
+		return null
+	}
 	const { actualTheme } = useTheme()
 	const themeSuffix = actualTheme === 'light' ? '-burn' : ''
 	const themeUrl = (import.meta as any).env.DEV

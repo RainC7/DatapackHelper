@@ -12,6 +12,8 @@ import type { VersionId } from './services/index.js'
 import { checkVersion } from './services/index.js'
 
 export const SOURCE_REPO_URL = 'https://github.com/misode/misode.github.io'
+export const OFFLINE = (import.meta as any).env.VITE_OFFLINE === 'true'
+export const OFFLINE_BASE = (import.meta as any).env.VITE_OFFLINE_BASE ?? '/offline-data'
 
 export function isPromise(obj: any): obj is Promise<any> {
 	return typeof (obj as any)?.then === 'function' 

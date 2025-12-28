@@ -73,7 +73,7 @@ export default defineConfig({
 				{ src: 'src/styles/giscus-burn.css', dest: 'assets' },
 			],
 		}),
-		visualizer({ open: true }),
+		visualizer({ open: false }),
 	],
 })
 

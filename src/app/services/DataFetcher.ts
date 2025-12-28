@@ -1,22 +1,22 @@
 import config from '../Config.js'
 import { Store } from '../Store.js'
-import { message } from '../Utils.js'
+import { message, OFFLINE, OFFLINE_BASE } from '../Utils.js'
 import type { VersionId } from './Versions.js'
 import { checkVersion } from './Versions.js'
 
-const CACHE_NAME = 'misode-v2'
+const CACHE_NAME = OFFLINE ? 'misode-offline' : 'misode-v2'
 const CACHE_LATEST_VERSION = 'cached_latest_version'
 const CACHE_PATCH = 'misode_cache_patch'
 
 declare var __LATEST_VERSION__: string
 export const latestVersion = __LATEST_VERSION__ ?? ''
-const mcmetaUrl = 'https://raw.githubusercontent.com/misode/mcmeta'
-const mcmetaTarballUrl = 'https://github.com/misode/mcmeta/tarball'
-const vanillaMcdocUrl = 'https://raw.githubusercontent.com/SpyglassMC/vanilla-mcdoc'
-const changesUrl = 'https://raw.githubusercontent.com/misode/technical-changes'
-const fixesUrl = 'https://raw.githubusercontent.com/misode/mcfixes'
-const versionDiffUrl = 'https://mcmeta-diff.misode.workers.dev'
-const whatsNewUrl = 'https://whats-new.misode.workers.dev'
+const mcmetaUrl = OFFLINE ? `${OFFLINE_BASE}/mcmeta` : 'https://raw.githubusercontent.com/misode/mcmeta'
+const mcmetaTarballUrl = OFFLINE ? `${OFFLINE_BASE}/mcmeta-tarball` : 'https://github.com/misode/mcmeta/tarball'
+const vanillaMcdocUrl = OFFLINE ? `${OFFLINE_BASE}/vanilla-mcdoc` : 'https://raw.githubusercontent.com/SpyglassMC/vanilla-mcdoc'
+const changesUrl = OFFLINE ? `${OFFLINE_BASE}/technical-changes` : 'https://raw.githubusercontent.com/misode/technical-changes'
+const fixesUrl = OFFLINE ? `${OFFLINE_BASE}/mcfixes` : 'https://raw.githubusercontent.com/misode/mcfixes'
+const versionDiffUrl = OFFLINE ? `${OFFLINE_BASE}/mcmeta-diff` : 'https://mcmeta-diff.misode.workers.dev'
+const whatsNewUrl = OFFLINE ? `${OFFLINE_BASE}/whats-new/index.json` : 'https://whats-new.misode.workers.dev'
 
 type McmetaTypes = 'summary' | 'data' | 'data-json' | 'assets' | 'assets-json' | 'registries' | 'atlas'
 
@@ -305,6 +305,10 @@ export async function fetchChangelogs(): Promise<Change[]> {
 		const versionMap = new Map(versions.map((v, i) => [v.id, versions.length - i]))
 		return changes.map(c => ({ ...c, order: versionMap.get(c.version) ?? 0 }))
 	} catch (e) {
+		if (OFFLINE) {
+			console.warn('Changes unavailable in offline mode:', message(e))
+			return []
+		}
 		throw new Error(`Error occured while fetching technical changes: ${message(e)}`)
 	}
 }
@@ -330,6 +334,10 @@ export async function fetchBugfixes(version: string): Promise<Bugfix[]> {
 		const fixes = await cachedFetch<Bugfix[]>(`${fixesUrl}/main/versions/${version}.json`, { refresh: true })
 		return fixes
 	} catch (e) {
+		if (OFFLINE) {
+			console.warn(`Bugfixes unavailable in offline mode for version ${version}:`, message(e))
+			return []
+		}
 		throw new Error(`Error occured while fetching bugfixes for version ${version}: ${message(e)}`)
 	}
 }
@@ -364,6 +372,10 @@ export async function fetchVersionDiff(version: string) {
 		const diff = await cachedFetch<GitHubCommit>(`${versionDiffUrl}/${version}`, { refresh: true })
 		return diff
 	} catch (e) {
+		if (OFFLINE) {
+			console.warn(`Version diff unavailable in offline mode for ${version}:`, message(e))
+			return undefined
+		}
 		throw new Error(`Error occured while fetching diff for version ${version}: ${message(e)}`)
 	}
 }
@@ -389,6 +401,10 @@ export async function fetchWhatsNew(): Promise<WhatsNewItem[]> {
 		}
 		return whatsNew
 	} catch (e) {
+		if (OFFLINE) {
+			console.warn('What\'s new unavailable in offline mode:', message(e))
+			return []
+		}
 		throw new Error(`Error occured while fetching what's new: ${message(e)}`)
 	}
 }

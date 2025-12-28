@@ -54,3 +54,9 @@ You are allowed to fork this repository and use its base as a way to publish you
 6. Make some other changes to the home page. This will depend on what you need, but you might want to remove stuff like `<WhatsNew />` and/or `<Tools />`.
 7. Edit the `Footer.tsx` component. You can remove the donation link, but I would appreciate if you still kept a note that your fork is based on my work, for example by linking to my github profile or this repository.
 8. Change some of the translations in `src/locales/en.json`. Particularly you might want to change the `title.home` key.
+
+## Offline Electron build
+1. Install dependencies (`npm install`) and fetch offline assets: `python scripts/fetch_offline_data.py --versions 1.21.11`.
+2. Build the app with offline flags: `npm run build:offline`.
+3. Package the Electron bundle: `npm run electron:build` (artifacts land in `release/`).
+4. For development with Electron and the Vite dev server, run `npm run electron:dev`.

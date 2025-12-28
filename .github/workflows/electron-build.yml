@@ -1,0 +1,35 @@
+name: Electron Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Package Electron app
+        run: npm run electron:build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: DatapackHelper-${{ matrix.os }}
+          path: release/**

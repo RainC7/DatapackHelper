@@ -1,4 +1,5 @@
 import lz from 'lz-string'
+import { OFFLINE } from '../Utils.js'
 import type { VersionId } from './Versions.js'
 
 const API_PREFIX = 'https://snippets.misode.workers.dev'
@@ -6,6 +7,9 @@ const API_PREFIX = 'https://snippets.misode.workers.dev'
 const ShareCache = new Map<string, string>()
 
 export async function shareSnippet(type: string, version: VersionId, text: string, show_preview: boolean) {
+	if (OFFLINE) {
+		throw new Error('Sharing snippets is disabled in offline mode.')
+	}
 	try {
 		const data = lz.compressToBase64(text)
 		const body = JSON.stringify({ data, type, version, show_preview })
@@ -25,6 +29,9 @@ export async function shareSnippet(type: string, version: VersionId, text: strin
 }
 
 export async function getSnippet(id: string) {
+	if (OFFLINE) {
+		throw new Error('Loading shared snippets is disabled in offline mode.')
+	}
 	try {
 		const snippet = await fetchApi(`/${id}`)
 		return {
